@@ -17,15 +17,14 @@ int funcaoOrdenacao(const void * x, const void * y)
    return (*(int*) x - *(int*) y);
 }
 
-//Salva valores temporarios.
-void gravaArq(char *arquivoTemp, int *vetor, int tamanhoVetor, int mudaLinhaFinal){
+void gravaArq(char *arquivoTemporario, int *vetor, int tamanhoVetor, int alteraUltimaLinha){
 	int i;
-	FILE *f = fopen(arquivoTemp, "a");
+	FILE *f = fopen(arquivoTemporario, "a");
 
 	for(i = 0; i < tamanhoVetor - 1; i++){
 		fprintf(f, "%d\n", vetor[i]);
 	}
-	if(mudaLinhaFinal == 0){
+	if(alteraUltimaLinha == 0){
 		fprintf(f, "%d", vetor[tamanhoVetor-1]);
 	} else {
 		fprintf(f, "%d\n", vetor[tamanhoVetor-1]);
@@ -33,24 +32,22 @@ void gravaArq(char *arquivoTemp, int *vetor, int tamanhoVetor, int mudaLinhaFina
 	fclose(f);
 }
 
-//Carrega o arquivo inicial e processa os proximos arquivos ordenados.
-int geraArqs(const char *arquivoEntrada){
+int geradorArquivos(const char *arqInput){
 
 	int qtdLida = 0;
 	int qtdArquivosGerados = 0;
 
 	char vetorTemp[20];
-	FILE *f = fopen(arquivoEntrada, "r");
+	FILE *f = fopen(arqInput, "r");
 
 	if (f == NULL){
-		printf("ERRO: Arquivo nao encontrado");
+		printf("Erro ao procurar o arquivo");
 		system("pause");
 		return 0;
 	}
 
 	int flag = 0;
 
-	//Armazena os dados das variaveis qtdArquivos, comprimentoSeries, tamanhoLista.
 	while(flag < 3){
 		if (flag == 0){
 			fscanf(f, "%i", &qtdArquivos);
@@ -70,7 +67,6 @@ int geraArqs(const char *arquivoEntrada){
 		fscanf(f, "%d", &vetorParaOrdenar[qtdLida]);
 		qtdLida++;
 
-		//Caso tenha lido a qtd máxima de dados permitido por vetor.
 		if(qtdLida == tamanhoLista){
 			qtdArquivosGerados++;
 			sprintf(vetorTemp,"Temporario%d.txt", qtdArquivosGerados);
@@ -79,7 +75,6 @@ int geraArqs(const char *arquivoEntrada){
 			qtdLida = 0;
 		}
 	}
-	//Caso total de elementos no arquivo não seja multiplo de n (Tamanho máximo permitido no vetor).
 	if(qtdLida > 0){
 		qtdArquivosGerados++;
 		sprintf(vetorTemp,"Temporario%d.txt", qtdArquivosGerados);
@@ -99,12 +94,10 @@ void populaValores(Valores *valores, int comprimentoSeries){
 	valores->atualLeitura = 0;
 	valores->maxLeitura = 0;
 	for(i = 0; i < comprimentoSeries; i++){
-		//Le os dados do arquivo e insere no vetor.
 		if(!feof(valores->file)){
 			fscanf(valores->file, "%d", &valores->vetor[valores->maxLeitura]);
 			valores->maxLeitura++;
 		} else {
-			//Fecha o arquivo caso tenha acabado os dados.
 			fclose(valores->file);
 			valores->file = NULL;
 			break;
@@ -112,14 +105,11 @@ void populaValores(Valores *valores, int comprimentoSeries){
 	}
 }
 
-//Pesquisa o menor valor dentre os arquivos temporarios
 int recuperaMinValor(Valores *arq, int qtdArquivos, int comprimentoSeries, int* menor){
 	int i;
 
-	// -1 = Valor nao encontrado, +1 = Valor encontrado
 	int achouMenor = -1;
 
-	//Compara as primeiras posicoes de cada arquivo temporario.
 	for(i = 0; i < qtdArquivos; i++){
 		if(arq[i].atualLeitura < arq[i].maxLeitura){
 			if(achouMenor == -1){
@@ -132,7 +122,6 @@ int recuperaMinValor(Valores *arq, int qtdArquivos, int comprimentoSeries, int* 
 		}
 	}
 
-	//Caso tenha achado o menor elemento, atualiza a posicao.
 	if(achouMenor != -1){
 		*menor = arq[achouMenor].vetor[arq[achouMenor].atualLeitura];
 		arq[achouMenor].atualLeitura++;
@@ -145,8 +134,7 @@ int recuperaMinValor(Valores *arq, int qtdArquivos, int comprimentoSeries, int* 
 	}
 }
 
-//Ordena os dados pelo metodo mergeSort nos arquivos temporarios
-void ordenaMergesort(char *arquivoTemp, int qtdArquivos, int comprimentoSeries){
+void ordenaMergesort(char *arquivoTemporario, int qtdArquivos, int comprimentoSeries){
 	char vetorTemp[20];
 	int i, menor;
 	int *vetor = (int*)malloc(comprimentoSeries * sizeof(int));
@@ -167,13 +155,13 @@ void ordenaMergesort(char *arquivoTemp, int qtdArquivos, int comprimentoSeries){
 		vetor[qtdVetor] = menor;
 		qtdVetor++;
 		if(qtdVetor == comprimentoSeries){
-			gravaArq(arquivoTemp, vetor, comprimentoSeries, 1);
+			gravaArq(arquivoTemporario, vetor, comprimentoSeries, 1);
 			qtdVetor = 0;
 		}
 	}
 
 	if(qtdVetor != 0){
-		gravaArq(arquivoTemp, vetor, qtdVetor, 1);
+		gravaArq(arquivoTemporario, vetor, qtdVetor, 1);
 	}
 
 	for(i = 0; i < qtdArquivos; i++){
@@ -186,7 +174,7 @@ void ordenaMergesort(char *arquivoTemp, int qtdArquivos, int comprimentoSeries){
 void mergesortImpl(const char *entrada, char *saida){
 	char temporario[20];
 
-	geraArqs(entrada);
+	geradorArquivos(entrada);
 	int i;
 
 	remove(entrada);
