@@ -108,25 +108,25 @@ void populaValores(Valores *valores, int comprimentoSeries){
 int recuperaMinValor(Valores *arq, int qtdArquivos, int comprimentoSeries, int* menor){
 	int i;
 
-	int achouMenor = -1;
+	int localizouMinimo = -1;
 
 	for(i = 0; i < qtdArquivos; i++){
 		if(arq[i].atualLeitura < arq[i].maxLeitura){
-			if(achouMenor == -1){
-				achouMenor = i;
+			if(localizouMinimo == -1){
+				localizouMinimo = i;
 			} else {
-				if(arq[i].vetor[arq[i].atualLeitura] < arq[achouMenor].vetor[arq[achouMenor].atualLeitura]){
-					achouMenor = i;
+				if(arq[i].vetor[arq[i].atualLeitura] < arq[localizouMinimo].vetor[arq[localizouMinimo].atualLeitura]){
+					localizouMinimo = i;
 				}
 			}
 		}
 	}
 
-	if(achouMenor != -1){
-		*menor = arq[achouMenor].vetor[arq[achouMenor].atualLeitura];
-		arq[achouMenor].atualLeitura++;
-		if(arq[achouMenor].atualLeitura == arq[achouMenor].maxLeitura){
-			populaValores(&arq[achouMenor], comprimentoSeries);
+	if(localizouMinimo != -1){
+		*menor = arq[localizouMinimo].vetor[arq[localizouMinimo].atualLeitura];
+		arq[localizouMinimo].atualLeitura++;
+		if(arq[localizouMinimo].atualLeitura == arq[localizouMinimo].maxLeitura){
+			populaValores(&arq[localizouMinimo], comprimentoSeries);
 		}
 		return 1;
 	} else {
